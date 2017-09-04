@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--  session form view /////////////////////////////////////////////////////-->
+    <record model="ir.ui.view" id="ssp_form_view">
+        <field name="name">res.form.view</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!--Ocultar campos///////////////////////////////////////////////////-->
+            <field name="function" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <!--xpath expr="//page[@name='sales_purchases']" position="attributes"><attribute name="invisible">1</attribute></xpath-->
+            <page name='sales_purchases' position="attributes">
+                <attribute name="invisible">1</attribute>
+            </page>
+            <page name='sales_purchases' position="attributes">
+                <attribute name="invisible">1</attribute>
+            </page>
+            <!--Insertar vista de nuevos campos ////////////////////////////////////////////////////////////-->
+            <xpath expr="//field[@name='fax']" position="after">
+                <field name="edad" string="Edad"/>
+            </xpath>
+            <xpath expr="//page[@name='Contacts_addres']" position="before">
+                <page string="II.- Domicilio" autofocus="autofocus">
+                    <group>
+                    
+                            <field String='Vivienda' name="vivienda_id" widget="radio"  options="{'horizontal': true}"/>
+                            
+                            <field string='Otro' name="otro_vivienda" attrs="{'invisible': [('vivienda_id', '=', 'Propia')]}"/>
+                    </group>
+                    
+                
+                </page>
+            </xpath>
+            <notebook position="inside">
+                <page string="III.- Lazos con la comunidad">
+                    <group>
+                        <field name="edad"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+    <!-- window action ///////////////////////////////////////////////////////////////////////////////-->
+    <!--
+            The following tag is an action definition for a "window action",
+            that is an action opening a view or a set of views
+        -->
+    <record model="ir.actions.act_window" id="ssp_list_action">
+        <field name="name">Expediente</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <!--field name="help" type="html"><p class="oe_view_nocontent_create">Create the first element                </p></field-->
+    </record>
+    <!-- top level menu: no parent -->
+    <menuitem id="main_ssp_menu" name="SSP System"/>
+    <!-- A first level in the left side menu is needed
+             before using action= attribute -->
+    <menuitem id="ssp_menu" name="Expedientes" parent="main_ssp_menu"/>
+    <!-- the following menuitem should appear *after*
+             its parent openacademy_menu and *after* its
+             action course_list_action -->
+    <menuitem id="expedientes_menu" name="Expediente" parent="ssp_menu" action="ssp_list_action"/>
+    <!-- Full id location: action="openacademy.course_list_action"
+             It is not required when it is the same module -->
+</odoo>
