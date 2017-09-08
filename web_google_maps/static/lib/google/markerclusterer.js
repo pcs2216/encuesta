@@ -1,11 +1,6 @@
-// ==ClosureCompiler==
-// @compilation_level ADVANCED_OPTIMIZATIONS
-// @externs_url http://closure-compiler.googlecode.com/svn/trunk/contrib/externs/maps/google_maps_api_v3_3.js
-// ==/ClosureCompiler==
-
 /**
  * @name MarkerClusterer for Google Maps v3
- * @version version 1.0
+ * @version version 1.0.1
  * @author Luke Mahe
  * @fileoverview
  * The library creates and manages per-zoom-level clusters for large amounts of
@@ -43,7 +38,7 @@
  *                cluster.
  *     'zoomOnClick': (boolean) Whether the default behaviour of clicking on a
  *                    cluster is to zoom into it.
- *     'averageCenter': (boolean) Wether the center of each cluster should be
+ *     'averageCenter': (boolean) Whether the center of each cluster should be
  *                      the average of all markers in the cluster.
  *     'minimumClusterSize': (number) The minimum number of markers to be in a
  *                           cluster before the markers are hidden and a count
@@ -161,14 +156,15 @@ function MarkerClusterer(map, opt_markers, opt_options) {
   // Add the map event listeners
   var that = this;
   google.maps.event.addListener(this.map_, 'zoom_changed', function() {
-    var maxZoom = that.map_.mapTypes[that.map_.getMapTypeId()].maxZoom;
+    // Determines map type and prevent illegal zoom levels
     var zoom = that.map_.getZoom();
-    if (zoom < 0 || zoom > maxZoom) {
-      return;
-    }
+    var minZoom = that.map_.minZoom || 0;
+    var maxZoom = Math.min(that.map_.maxZoom || 100,
+                         that.map_.mapTypes[that.map_.getMapTypeId()].maxZoom);
+    zoom = Math.min(Math.max(zoom,minZoom),maxZoom);
 
     if (that.prevZoom_ != zoom) {
-      that.prevZoom_ = that.map_.getZoom();
+      that.prevZoom_ = zoom;
       that.resetViewport();
     }
   });
@@ -178,7 +174,7 @@ function MarkerClusterer(map, opt_markers, opt_options) {
   });
 
   // Finally, add the markers
-  if (opt_markers && opt_markers.length) {
+  if (opt_markers && (opt_markers.length || Object.keys(opt_markers).length)) {
     this.addMarkers(opt_markers, false);
   }
 }
@@ -190,9 +186,7 @@ function MarkerClusterer(map, opt_markers, opt_options) {
  * @type {string}
  * @private
  */
-MarkerClusterer.prototype.MARKER_CLUSTER_IMAGE_PATH_ =
-    'http://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/' +
-    'images/m';
+MarkerClusterer.prototype.MARKER_CLUSTER_IMAGE_PATH_ = '../images/m';
 
 
 /**
@@ -344,7 +338,7 @@ MarkerClusterer.prototype.setMaxZoom = function(maxZoom) {
  *  @return {number} The max zoom level.
  */
 MarkerClusterer.prototype.getMaxZoom = function() {
-  return this.maxZoom_ || this.map_.mapTypes[this.map_.getMapTypeId()].maxZoom;
+  return this.maxZoom_;
 };
 
 
@@ -403,8 +397,14 @@ MarkerClusterer.prototype.getCalculator = function() {
  * @param {boolean=} opt_nodraw Whether to redraw the clusters.
  */
 MarkerClusterer.prototype.addMarkers = function(markers, opt_nodraw) {
-  for (var i = 0, marker; marker = markers[i]; i++) {
-    this.pushMarkerTo_(marker);
+  if (markers.length) {
+    for (var i = 0, marker; marker = markers[i]; i++) {
+      this.pushMarkerTo_(marker);
+    }
+  } else if (Object.keys(markers).length) {
+    for (var marker in markers) {
+      this.pushMarkerTo_(markers[marker]);
+    }
   }
   if (!opt_nodraw) {
     this.redraw();
@@ -988,7 +988,7 @@ Cluster.prototype.updateIcon = function() {
   var zoom = this.map_.getZoom();
   var mz = this.markerClusterer_.getMaxZoom();
 
-  if (zoom > mz) {
+  if (mz && zoom > mz) {
     // The zoom is greater than our max zoom so show all the markers in cluster.
     for (var i = 0, marker; marker = this.markers_[i]; i++) {
       marker.setMap(this.map_);
@@ -1241,54 +1241,3 @@ ClusterIcon.prototype.createCss = function(pos) {
       txtSize + 'px; font-family:Arial,sans-serif; font-weight:bold');
   return style.join('');
 };
-
-
-// Export Symbols for Closure
-// If you are not going to compile with closure then you can remove the
-// code below.
-window['MarkerClusterer'] = MarkerClusterer;
-MarkerClusterer.prototype['addMarker'] = MarkerClusterer.prototype.addMarker;
-MarkerClusterer.prototype['addMarkers'] = MarkerClusterer.prototype.addMarkers;
-MarkerClusterer.prototype['clearMarkers'] =
-    MarkerClusterer.prototype.clearMarkers;
-MarkerClusterer.prototype['fitMapToMarkers'] =
-    MarkerClusterer.prototype.fitMapToMarkers;
-MarkerClusterer.prototype['getCalculator'] =
-    MarkerClusterer.prototype.getCalculator;
-MarkerClusterer.prototype['getGridSize'] =
-    MarkerClusterer.prototype.getGridSize;
-MarkerClusterer.prototype['getExtendedBounds'] =
-    MarkerClusterer.prototype.getExtendedBounds;
-MarkerClusterer.prototype['getMap'] = MarkerClusterer.prototype.getMap;
-MarkerClusterer.prototype['getMarkers'] = MarkerClusterer.prototype.getMarkers;
-MarkerClusterer.prototype['getMaxZoom'] = MarkerClusterer.prototype.getMaxZoom;
-MarkerClusterer.prototype['getStyles'] = MarkerClusterer.prototype.getStyles;
-MarkerClusterer.prototype['getTotalClusters'] =
-    MarkerClusterer.prototype.getTotalClusters;
-MarkerClusterer.prototype['getTotalMarkers'] =
-    MarkerClusterer.prototype.getTotalMarkers;
-MarkerClusterer.prototype['redraw'] = MarkerClusterer.prototype.redraw;
-MarkerClusterer.prototype['removeMarker'] =
-    MarkerClusterer.prototype.removeMarker;
-MarkerClusterer.prototype['removeMarkers'] =
-    MarkerClusterer.prototype.removeMarkers;
-MarkerClusterer.prototype['resetViewport'] =
-    MarkerClusterer.prototype.resetViewport;
-MarkerClusterer.prototype['repaint'] =
-    MarkerClusterer.prototype.repaint;
-MarkerClusterer.prototype['setCalculator'] =
-    MarkerClusterer.prototype.setCalculator;
-MarkerClusterer.prototype['setGridSize'] =
-    MarkerClusterer.prototype.setGridSize;
-MarkerClusterer.prototype['setMaxZoom'] =
-    MarkerClusterer.prototype.setMaxZoom;
-MarkerClusterer.prototype['onAdd'] = MarkerClusterer.prototype.onAdd;
-MarkerClusterer.prototype['draw'] = MarkerClusterer.prototype.draw;
-
-Cluster.prototype['getCenter'] = Cluster.prototype.getCenter;
-Cluster.prototype['getSize'] = Cluster.prototype.getSize;
-Cluster.prototype['getMarkers'] = Cluster.prototype.getMarkers;
-
-ClusterIcon.prototype['onAdd'] = ClusterIcon.prototype.onAdd;
-ClusterIcon.prototype['draw'] = ClusterIcon.prototype.draw;
-ClusterIcon.prototype['onRemove'] = ClusterIcon.prototype.onRemove;
