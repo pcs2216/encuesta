@@ -38,7 +38,7 @@ odoo.define('web.MapViewPlacesAutocomplete', function (require) {
     function odoo_prepare_values(model, field_name, value) {
         var def = $.Deferred();
         var res = {};
-        if (model) {
+        if (model && value) {
             new Model(model).call('search', [['|', ['name', '=', value], ['code', '=', value]]]).done(function (record) {
                 res[field_name] = record.length > 0 ? record[0] : false;
                 def.resolve(res);
@@ -66,14 +66,12 @@ odoo.define('web.MapViewPlacesAutocomplete', function (require) {
         var values = {};
         _.each(place_options, function (option, field) {
             if (option instanceof Array && !_.has(values, field)) {
-                var val = _.first(_.map(option, function (opt) {
-                    return place[opt];
+                var vals = _.filter(_.map(option, function (opt) {
+                    return place[opt] || false;
                 }));
-                if (val) {
-                    values[field] = val;
-                }
+                values[field] = vals.length > 0 ? vals[0] : "";
             } else {
-                values[field] = place[option];
+                values[field] = place[option] || "";
             }
         });
         return values;
@@ -229,7 +227,7 @@ odoo.define('web.MapViewPlacesAutocomplete', function (require) {
                         def.resolve(values);
                     });
                 }).fail(function () {
-                    console.log('failed!');
+                    console.log("Couldn't get marker position!");
                     def.reject();
                 });
             }
@@ -274,7 +272,7 @@ odoo.define('web.MapViewPlacesAutocomplete', function (require) {
                 self.on_set_marker_animation();
                 self.marker_infowindow.close();
                 self.place_marker.setVisible(false);
-                var place = self.place_automplete.getPlace();
+                var place = this.getPlace();
                 if (!place.geometry) {
                     // User entered the name of a Place that was not suggested and
                     // pressed the Enter key, or the Place Details request failed.
@@ -403,6 +401,10 @@ odoo.define('web.MapViewPlacesAutocomplete', function (require) {
             }
             return def;
         },
+        destroy: function() {
+            google.maps.event.clearInstanceListeners(this.place_automplete);
+            this._super.apply(this, arguments);
+        }
     });
 
     return {
