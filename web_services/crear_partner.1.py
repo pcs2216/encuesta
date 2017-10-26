@@ -2,7 +2,6 @@
 import csv
 import functools
 import xmlrpclib
-import base64
 HOST = '172.17.0.2'
 PORT = 8069
 DB = 'encuesta'
@@ -36,12 +35,7 @@ for row in reader:
             cont=cont+1            
         print partner_template
 
-        #partner_id = call('res.partner', 'create', partner_template)
-        #print partner_id
-
-
-img = open('images.jpg', 'rb').read()
-data = base64.b64encode(img)
-# Write data to odoo
-ids = call('res.partner', 'create',  {'name':'ferras','image':data})
-print "\n partner ids %s" % ids
+        partner_id = call('res.partner', 'create', partner_template)
+        print partner_id
+#ids = call('res.partner', 'search_read', [('__export__', '=', 9)], ['name'])
+#print "\n partner ids %s" % ids
