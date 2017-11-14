@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "SSP System",
+    'name': "Botón Pánico",
 
-    'summary': """Entrevista para el retenido""",
+    'summary': """Odoo para administrar el botón de pánico de la SSP""",
 
     'description': """
-        Administración de encuestas para retenido
-        Creación de expedientes  
+        recibe una señal vía webservice y actualiza un campo en res.partner
     """,
 
     'author': "soluciones4g",
@@ -23,10 +22,7 @@
 
     # always loaded
     'data': [
-        'views/vista_ssp.xml',
-        #'views/vista_ssp2.xml',
-        #'views/views.xml',
-        # 'views/templates.xml',
+        'views/vista_partner.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
